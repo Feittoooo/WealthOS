@@ -2,7 +2,7 @@
 
 [English](ROADMAP.md) | Español
 
-Más o menos en el orden en que quiero hacer las cosas. Sin fechas, que es un proyecto personal. La estimación de esfuerzo de muchas de estas tareas está en [ISSUES.es.md](ISSUES.es.md).
+Más o menos en el orden en que quiero hacer las cosas. Sin fechas, que es un proyecto personal. Muchas de estas tareas tienen su [issue](https://github.com/Feittoooo/WealthOS/issues) con más detalle y una estimación de esfuerzo.
 
 ## Fase 1: Base (MVP) - hecha
 

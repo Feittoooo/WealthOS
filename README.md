@@ -155,13 +155,13 @@ What's in v0.1:
 - In-app debug page, request tracing, API docs
 - Java and frontend tests
 
-Next up: the Yahoo price source, CSV import from brokers, currency conversion and PDF reports. The rest is in [ROADMAP.md](ROADMAP.md), and [ISSUES.md](ISSUES.md) has the first batch of issues.
+Next up: the Yahoo price source, CSV import from brokers, currency conversion and PDF reports. The rest is in [ROADMAP.md](ROADMAP.md), and the planned work is in the [issues](https://github.com/Feittoooo/WealthOS/issues).
 
 ## Contributing
 
 Pull requests are welcome, especially from people who know Spanish tax rules better than I do.
 
-- Open an issue first for anything bigger than a small fix, or grab one from ISSUES.md.
+- Open an issue first for anything bigger than a small fix, or grab one from the [issues](https://github.com/Feittoooo/WealthOS/issues); the ones labelled `good first issue` are a good start.
 - Keep each PR focused on one thing.
 - Run `./mvnw test` before pushing and add tests for any new calculation.
 - Keep the layers apart: controllers stay thin, rules go in services, components don't call `HttpClient` directly (use the feature's `*.api.ts`).

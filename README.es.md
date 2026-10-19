@@ -155,13 +155,13 @@ Lo que trae la v0.1:
 - Página de depuración, traza de peticiones, documentación de la API
 - Tests de Java y del frontend
 
-Lo siguiente: la fuente de precios de Yahoo, importar CSV de brókers, conversión de divisas e informes en PDF. El resto está en [ROADMAP.es.md](ROADMAP.es.md), y en [ISSUES.es.md](ISSUES.es.md) está la primera tanda de issues.
+Lo siguiente: la fuente de precios de Yahoo, importar CSV de brókers, conversión de divisas e informes en PDF. El resto está en [ROADMAP.es.md](ROADMAP.es.md), y el trabajo previsto está en las [issues](https://github.com/Feittoooo/WealthOS/issues).
 
 ## Contribuir
 
 Las pull requests son bienvenidas, sobre todo de gente que sepa de fiscalidad española más que yo.
 
-- Para cualquier cosa más grande que un arreglo pequeño, abre antes una issue o coge una de ISSUES.es.md.
+- Para cualquier cosa más grande que un arreglo pequeño, abre antes una issue o coge una de las [issues](https://github.com/Feittoooo/WealthOS/issues); las que llevan `good first issue` son buenas para empezar.
 - Que cada PR haga una sola cosa.
 - Pasa `./mvnw test` antes de subir nada y añade tests para cualquier cálculo nuevo.
 - Respeta las capas: los controladores, finos; las reglas, en los servicios; los componentes no llaman a `HttpClient` directamente (para eso está el `*.api.ts` de cada funcionalidad).

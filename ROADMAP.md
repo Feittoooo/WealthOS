@@ -2,7 +2,7 @@
 
 English | [Español](ROADMAP.es.md)
 
-Roughly in the order I want to do things. No dates, this is a side project. Effort estimates for many of these are in [ISSUES.md](ISSUES.md).
+Roughly in the order I want to do things. No dates, this is a side project. Many of these have an [issue](https://github.com/Feittoooo/WealthOS/issues) with more detail and an effort estimate.
 
 ## Phase 1: Core (MVP) - done
 
