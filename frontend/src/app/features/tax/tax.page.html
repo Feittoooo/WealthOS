@@ -1,0 +1,212 @@
+<header class="page-header">
+  <div>
+    <h1>{{ 'tax.title' | t }} <span class="tag">{{ 'common.betaEarly' | t }}</span></h1>
+    <p class="muted">{{ 'tax.subtitle' | t }}</p>
+  </div>
+  <div class="page-header__actions">
+    @if (overview(); as o) {
+      <label class="check check--inline">
+        <input type="checkbox" [checked]="o.settings.showOnDashboard" (change)="toggleDashboard($any($event.target).checked)">
+        <span>{{ 'tax.showOnDashboard' | t }}</span>
+      </label>
+    }
+    <button type="button" class="button" (click)="settingsOpen.set(true)">{{ 'tax.settings' | t }}</button>
+    <button type="button" class="button button--primary" (click)="entryDialog.set({ entry: null })">{{ 'tax.addEntry' | t }}</button>
+  </div>
+</header>
+
+<div class="notice notice--warning" role="note">
+  <strong>{{ 'tax.disclaimerStrong' | t }}</strong> {{ 'tax.disclaimer' | t }}
+</div>
+
+@if (overview(); as o) {
+  <div class="toolbar">
+    <select [value]="o.year" (change)="selectQuarter(+$any($event.target).value, o.quarter)" [attr.aria-label]="'tax.year' | t">
+      @for (y of years(); track y) { <option [value]="y" [selected]="y === o.year">{{ y }}</option> }
+    </select>
+    <div class="segmented" role="radiogroup" [attr.aria-label]="'tax.quarterNav' | t">
+      @for (q of quarters; track q) {
+        <button type="button" role="radio" [class.is-active]="q === o.quarter" [attr.aria-checked]="q === o.quarter"
+                (click)="selectQuarter(o.year, q)">
+          {{ 'tax.q' | t: [q] }}@if (o.year === o.currentYear && q === o.currentQuarter) { * }
+        </button>
+      }
+    </div>
+    <span class="muted toolbar__right">
+      {{ o.summary.from | localDate }} - {{ o.summary.to | localDate }} ·
+      {{ 'tax.due' | t }} {{ o.summary.filingDeadline | localDate }}
+    </span>
+  </div>
+
+  <section class="stats">
+    <div class="stat">
+      <span class="stat__label">{{ 'tax.income' | t }}</span>
+      <strong class="stat__value">{{ o.summary.income | money }}</strong>
+      <span class="stat__meta">{{ 'tax.incomeHint' | t }}</span>
+    </div>
+    <div class="stat">
+      <span class="stat__label">{{ 'tax.deductible' | t }}</span>
+      <strong class="stat__value">{{ o.summary.income - o.summary.netIncome | money }}</strong>
+      <span class="stat__meta">{{ o.settings.cuotaDeductible ? ('tax.inclCuota' | t: [(o.summary.cuota | money)]) : ('tax.cuotaNotIncluded' | t) }}</span>
+    </div>
+    <div class="stat">
+      <span class="stat__label">{{ 'tax.net' | t }}</span>
+      <strong class="stat__value" [ngClass]="{ negative: o.summary.netIncome < 0 }">{{ o.summary.netIncome | money }}</strong>
+      <span class="stat__meta">{{ 'tax.withheld' | t: [(o.summary.retentions | money)] }}</span>
+    </div>
+    <div class="stat">
+      <span class="stat__label">{{ 'tax.toPay' | t }}</span>
+      <strong class="stat__value">{{ o.summary.totalToPay | money }}</strong>
+      <span class="stat__meta">303: {{ o.summary.ivaToPay | money }} · 130: {{ o.summary.modelo130ToPay | money }}</span>
+    </div>
+  </section>
+
+  <div class="columns columns--1-1">
+    <section class="panel">
+      <header class="panel__header"><h2>303 · {{ 'tax.303.title' | t }}</h2></header>
+      <table class="table table--plain">
+        <tbody>
+          <tr><td>{{ 'tax.303.out' | t }}</td><td class="num">{{ o.summary.ivaRepercutido | money }}</td></tr>
+          <tr><td>{{ 'tax.303.in' | t }}</td><td class="num">-{{ o.summary.ivaSoportado | money }}</td></tr>
+          <tr class="row-total">
+            <td>{{ (o.summary.ivaResult >= 0 ? 'tax.resultPay' : 'tax.resultCompensate') | t }}</td>
+            <td class="num">{{ (o.summary.ivaResult < 0 ? -o.summary.ivaResult : o.summary.ivaResult) | money }}</td>
+          </tr>
+        </tbody>
+      </table>
+      @if (o.summary.ivaResult < 0) { <p class="panel__footnote">{{ 'tax.303.negative' | t }}</p> }
+    </section>
+
+    <section class="panel">
+      <header class="panel__header">
+        <h2>130 · {{ 'tax.130.title' | t }}</h2>
+        @if (o.summary.likely130Exempt) { <span class="tag" [title]="'tax.exemptTitle' | t">{{ 'tax.exempt' | t }}</span> }
+      </header>
+      <table class="table table--plain">
+        <tbody>
+          <tr><td>{{ 'tax.130.income' | t }}</td><td class="num">{{ o.summary.ytdIncome | money }}</td></tr>
+          <tr><td>{{ 'tax.130.expenses' | t }}</td><td class="num">-{{ o.summary.ytdDeductible | money }}</td></tr>
+          <tr><td>{{ 'tax.130.net' | t }}</td><td class="num">{{ o.summary.ytdNetIncome | money }}</td></tr>
+          <tr><td class="indent">{{ 'tax.130.gross' | t }}</td><td class="num">{{ o.summary.modelo130Gross | money }}</td></tr>
+          <tr><td class="indent">{{ 'tax.130.withheld' | t }}</td><td class="num">-{{ o.summary.ytdRetentions | money }}</td></tr>
+          <tr><td class="indent">{{ 'tax.130.previous' | t }}</td><td class="num">-{{ o.summary.previousPayments | money }}</td></tr>
+          <tr class="row-total"><td>{{ 'tax.resultPay' | t }}</td><td class="num">{{ o.summary.modelo130ToPay | money }}</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <section class="panel">
+    <header class="panel__header">
+      <h2>{{ 'tax.overview' | t: ['' + o.year] }}</h2>
+      <span class="panel__note">{{ 'tax.overviewSub' | t: [(o.yearTotalToPay | money)] }}</span>
+    </header>
+    <table class="table">
+      <thead>
+        <tr><th>{{ 'tax.quarterNav' | t }}</th><th>{{ 'tax.due' | t }}</th><th class="num">{{ 'tax.entries' | t }}</th><th class="num">303</th><th class="num">130</th><th class="num">{{ 'common.total' | t }}</th></tr>
+      </thead>
+      <tbody>
+        @for (s of o.yearSummaries; track s.quarter) {
+          <tr class="row-link" [class.is-selected]="s.quarter === o.quarter" (click)="selectQuarter(o.year, s.quarter)">
+            <td>{{ 'tax.q' | t: [s.quarter] }}</td>
+            <td>{{ s.filingDeadline | localDate }}</td>
+            <td class="num">{{ s.entryCount }}</td>
+            <td class="num">{{ s.hasData ? (s.ivaToPay | money) : '-' }}</td>
+            <td class="num">{{ s.hasData ? (s.modelo130ToPay | money) : '-' }}</td>
+            <td class="num"><strong>{{ s.hasData ? (s.totalToPay | money) : '-' }}</strong></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel">
+    <header class="panel__header">
+      <h2>{{ 'tax.entriesTitle' | t: [('common.quarter' | t: [o.quarter, '' + o.year])] }}</h2>
+      <select [value]="typeFilter()" (change)="typeFilter.set($any($event.target).value)">
+        <option value="">{{ 'tax.allEntries' | t }}</option>
+        <option value="INGRESO">{{ 'tax.income' | t }}</option>
+        <option value="GASTO">{{ 'tax.expenses' | t }}</option>
+      </select>
+    </header>
+    @if (o.entries.length) {
+      <div class="table-scroll">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>{{ 'tax.col.date' | t }}</th><th>{{ 'tax.col.concept' | t }}</th>
+              <th class="num">{{ 'tax.col.base' | t }}</th><th class="num">IVA</th><th class="num">IRPF</th>
+              <th class="num">{{ 'common.total' | t }}</th><th><span class="sr-only">{{ 'common.actions' | t }}</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of entries(); track e.id) {
+              <tr>
+                <td class="nowrap">{{ e.date | localDate: 'short' }}</td>
+                <td>
+                  <span class="tag" [ngClass]="e.type === 'INGRESO' ? 'tag--positive' : 'tag--negative'">{{ 'entryType.' + e.type | t }}</span>
+                  {{ e.concept }}<br>
+                  <small class="muted">{{ e.counterparty ?? ('tax.noCounterparty' | t) }}@if (e.category) { · {{ e.category }} }@if (e.type === 'GASTO' && !e.deductible) { · {{ 'tax.notDeductible' | t }} }</small>
+                </td>
+                <td class="num">{{ e.baseAmount | money }}</td>
+                <td class="num">{{ e.ivaAmount | money }}<br><small class="muted">{{ e.ivaRate }}%</small></td>
+                <td class="num">
+                  @if (e.type === 'INGRESO' && e.irpfRetentionRate > 0) {
+                    -{{ e.retentionAmount | money }}<br><small class="muted">{{ e.irpfRetentionRate }}%</small>
+                  } @else { <span class="muted">-</span> }
+                </td>
+                <td class="num">{{ e.total | money }}</td>
+                <td class="actions">
+                  <button type="button" class="icon-button" (click)="entryDialog.set({ entry: e })" [title]="'common.edit' | t"><app-icon name="pencil" /></button>
+                  <button type="button" class="icon-button icon-button--danger" (click)="deleteEntry(e)" [title]="'common.delete' | t"><app-icon name="trash" /></button>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="7" class="muted">{{ 'tax.noMatch' | t }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <app-empty-state titleKey="tax.noEntriesTitle" textKey="tax.noEntriesText">
+        <button type="button" class="button button--primary" (click)="entryDialog.set({ entry: null })">{{ 'tax.addEntry' | t }}</button>
+      </app-empty-state>
+    }
+  </section>
+
+  <div class="columns columns--1-1">
+    <section class="panel">
+      <header class="panel__header"><h2>{{ 'tax.calendar' | t }}</h2><span class="panel__note">{{ 'tax.calendarSub' | t }}</span></header>
+      <app-deadline-list [deadlines]="o.deadlines" />
+    </section>
+
+    <section class="panel">
+      <header class="panel__header">
+        <h2>{{ 'tax.cuota' | t }}</h2>
+        <span class="panel__note">{{ 'tax.monthly' | t }} {{ o.settings.monthlyCuota | money }} · {{ 'tax.paidIn' | t: ['' + o.year] }} {{ o.cuotaPaidInYear | money }}</span>
+      </header>
+      <div class="panel__body">
+        <div class="cuota-grid">
+          @for (m of o.cuotaMonths; track m.month) {
+            <button type="button" class="cuota-month" [class.is-paid]="m.paid" [class.is-current]="m.current"
+                    [class.is-future]="m.future" [attr.aria-pressed]="m.paid"
+                    [title]="(m.paid ? 'tax.paidTitle' : 'tax.markPaid') | t" (click)="toggleCuota(m.month)">
+              {{ monthLabel(m.month) }}
+              @if (m.paid) { <app-icon name="check" class="icon--inline" /> }
+            </button>
+          }
+        </div>
+        <p class="muted m-0"><small>{{ (o.settings.cuotaDeductible ? 'tax.cuotaDeducted' : 'tax.cuotaNotDeducted') | t }}</small></p>
+      </div>
+    </section>
+  </div>
+
+  <p class="footnote">{{ 'tax.footer' | t }}</p>
+
+  <app-entry-dialog [open]="!!entryDialog()" [entry]="entryDialog()?.entry ?? null" [settings]="o.settings"
+                    [defaultDate]="o.today" (closed)="entryDialog.set(null)" (saved)="entrySaved($event)" />
+  <app-settings-dialog [open]="settingsOpen()" [settings]="o.settings"
+                       (closed)="settingsOpen.set(false)" (saved)="settingsSaved()" />
+} @else {
+  <p class="muted">{{ 'common.loading' | t }}</p>
+}

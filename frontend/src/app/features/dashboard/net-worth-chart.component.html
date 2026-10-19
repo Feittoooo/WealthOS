@@ -1,0 +1,38 @@
+<div class="chart-toolbar">
+  <div class="segmented segmented--small" role="radiogroup" [attr.aria-label]="'chart.range' | t">
+    @for (r of ranges; track r) {
+      <button type="button" role="radio" [attr.aria-checked]="range() === r" [class.is-active]="range() === r"
+              (click)="select(r)">{{ 'chart.range.' + r | t }}</button>
+    }
+  </div>
+  @if (range() === 'CUSTOM') {
+    <form class="chart-toolbar__custom" (ngSubmit)="apply()">
+      <label><span class="sr-only">{{ 'chart.from' | t }}</span>
+        <input type="date" name="from" [(ngModel)]="from" [max]="to || today" [attr.aria-label]="'chart.from' | t">
+      </label>
+      <span class="muted">–</span>
+      <label><span class="sr-only">{{ 'chart.to' | t }}</span>
+        <input type="date" name="to" [(ngModel)]="to" [min]="from" [max]="today" [attr.aria-label]="'chart.to' | t">
+      </label>
+      <button type="submit" class="button" [disabled]="!from">{{ 'chart.apply' | t }}</button>
+    </form>
+  }
+  @if (series()?.points?.length) {
+    <div class="chart-legend">
+      <span class="chart-legend__item"><i class="chart-legend__line"></i>{{ 'dash.netWorth' | t }}</span>
+      <span class="chart-legend__item"><i class="chart-legend__line chart-legend__line--dashed"></i>{{ 'chart.invested' | t }}</span>
+    </div>
+  }
+</div>
+
+@if (error(); as e) {
+  <p class="text-negative">{{ e }}</p>
+} @else if (values().length) {
+  <app-chart kind="line" class="chart--tall" [labels]="labels()" [values]="values()" [label]="'dash.netWorth' | t"
+             [secondary]="invested()" [secondaryLabel]="'chart.invested' | t" />
+  @if (series()!.estimated) {
+    <p class="muted m-0"><small>{{ 'chart.estimated' | t }}</small></p>
+  }
+} @else if (series()) {
+  <p class="muted">{{ 'dash.noHistory' | t }}</p>
+}

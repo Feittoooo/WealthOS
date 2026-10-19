@@ -1,0 +1,33 @@
+<app-modal [open]="!!operation()" (closed)="closed.emit()"
+           [title]="operation() ? ('op.editTitle' | t: [('opType.' + operation()!.type | t), ticker()]) : ''"
+           [subtitle]="'op.editText' | t">
+  <form class="dialog__form" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="dialog__body form">
+      <app-form-error [error]="error()" />
+
+      <div class="form-row form-row--3">
+        <label class="field">
+          <span>{{ 'form.date' | t }}</span>
+          <input type="date" formControlName="date" [max]="today">
+        </label>
+        <label class="field">
+          <span>{{ 'inv.col.quantity' | t }}</span>
+          <input type="number" step="any" min="0" formControlName="units" class="num">
+        </label>
+        <label class="field">
+          <span>{{ 'inv.col.price' | t }}</span>
+          <input type="number" step="any" min="0" formControlName="price" class="num">
+        </label>
+      </div>
+
+      @if (form.value.units && form.value.price) {
+        <p class="muted m-0">{{ 'op.amount' | t: [(form.value.units * form.value.price | money: currency())] }}</p>
+      }
+    </div>
+
+    <div class="dialog__footer">
+      <button type="button" class="button" (click)="closed.emit()">{{ 'common.cancel' | t }}</button>
+      <button type="submit" class="button button--primary" [disabled]="saving()">{{ 'common.save' | t }}</button>
+    </div>
+  </form>
+</app-modal>

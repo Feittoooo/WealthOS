@@ -1,0 +1,38 @@
+<aside class="sidebar">
+  <a class="sidebar__brand" routerLink="/">WealthOS</a>
+
+  <nav class="sidebar__nav">
+    <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">
+      <app-icon name="dashboard" /><span>{{ 'nav.dashboard' | t }}</span>
+    </a>
+    <a routerLink="/investments" routerLinkActive="is-active">
+      <app-icon name="investments" /><span>{{ 'nav.investments' | t }}</span>
+    </a>
+    <a routerLink="/tax" routerLinkActive="is-active">
+      <app-icon name="tax" /><span>{{ 'nav.tax' | t }}</span><span class="tag">{{ 'common.beta' | t }}</span>
+    </a>
+    @if (app.debugEnabled()) {
+      <a routerLink="/debug" routerLinkActive="is-active">
+        <app-icon name="debug" /><span>{{ 'nav.debug' | t }}</span>
+      </a>
+    }
+  </nav>
+
+  <div class="sidebar__footer">
+    <app-data-menu />
+
+    <div class="sidebar__row">
+      <div class="segmented segmented--small" role="radiogroup" [attr.aria-label]="'lang.title' | t">
+        <button type="button" role="radio" [class.is-active]="i18n.language() === 'en'"
+                [attr.aria-checked]="i18n.language() === 'en'" (click)="setLanguage('en')">EN</button>
+        <button type="button" role="radio" [class.is-active]="i18n.language() === 'es'"
+                [attr.aria-checked]="i18n.language() === 'es'" (click)="setLanguage('es')">ES</button>
+      </div>
+      <button type="button" class="icon-button" (click)="theme.toggle()" [title]="'sidebar.themeTitle' | t">
+        <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" />
+      </button>
+    </div>
+
+    <p class="sidebar__note">{{ 'sidebar.privacy' | t }}</p>
+  </div>
+</aside>

@@ -1,0 +1,5 @@
+# Copy this file to data/.gitignore if you keep the data/ folder in the repo
+# (the root .gitignore already ignores data/ entirely).
+# The H2 database holds your real financial data and must never be committed.
+*
+!.gitignore

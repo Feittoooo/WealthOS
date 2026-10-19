@@ -1,0 +1,114 @@
+<header class="page-header">
+  <div>
+    <h1>{{ 'nav.dashboard' | t }}</h1>
+    <p class="muted">{{ today | localDate: 'long' }}</p>
+  </div>
+  @if (view() && !view()!.empty) {
+    <div class="page-header__actions">
+      <a class="button" routerLink="/investments">{{ 'dash.goInvestments' | t }}</a>
+    </div>
+  }
+</header>
+
+@if (loading() && !view()) {
+  <p class="muted">{{ 'common.loading' | t }}</p>
+}
+
+@if (view(); as v) {
+  @if (v.empty) {
+    <section class="panel">
+      <app-empty-state titleKey="dash.emptyTitle" textKey="dash.emptyText">
+        <a class="button button--primary" routerLink="/investments">{{ 'dash.createAccount' | t }}</a>
+        <button type="button" class="button" (click)="loadSample()">{{ 'data.loadSample' | t }}</button>
+      </app-empty-state>
+    </section>
+  } @else {
+    <section class="stats">
+      <div class="stat">
+        <span class="stat__label">{{ 'dash.netWorth' | t }}</span>
+        <strong class="stat__value">{{ v.summary.netWorth | money }}</strong>
+        <span class="stat__meta">
+          @if (v.changeSinceLastMonth !== null) {
+            <span [ngClass]="v.changeSinceLastMonth | tone">{{ v.changeSinceLastMonth | money: undefined : true }}
+              @if (v.changeSinceLastMonthPct !== null) { ({{ v.changeSinceLastMonthPct | pct: true }}) }</span>
+            {{ 'dash.vsLastMonth' | t }}
+          } @else {
+            {{ 'dash.netWorthHint' | t }}
+          }
+        </span>
+      </div>
+      <div class="stat">
+        <span class="stat__label">{{ 'nav.investments' | t }}</span>
+        <strong class="stat__value">{{ v.summary.marketValue | money }}</strong>
+        <span class="stat__meta">
+          <span [ngClass]="v.summary.totalReturn | tone">{{ v.summary.totalReturn | money: undefined : true }}
+            ({{ v.summary.totalReturnPct | pct: true }})</span>
+        </span>
+      </div>
+      <div class="stat">
+        <span class="stat__label">{{ 'inv.invested' | t }}</span>
+        <strong class="stat__value">{{ v.summary.totalInvested | money }}</strong>
+        <span class="stat__meta">{{ 'dash.openPositions' | t: [v.summary.positionsCount] }}</span>
+      </div>
+      <div class="stat">
+        <span class="stat__label">{{ 'common.cash' | t }}</span>
+        <strong class="stat__value">{{ v.summary.totalCash | money }}</strong>
+        <span class="stat__meta">{{ 'dash.inAccounts' | t: [v.summary.accountsCount] }}</span>
+      </div>
+    </section>
+
+    <div class="columns columns--2-1">
+      <section class="panel">
+        <header class="panel__header"><h2>{{ 'dash.evolution' | t }}</h2></header>
+        <div class="panel__body">
+          <app-net-worth-chart [version]="events.version()" />
+        </div>
+      </section>
+
+      <section class="panel">
+        <header class="panel__header">
+          <h2>{{ 'dash.allocation' | t }}</h2>
+          <a routerLink="/investments" class="panel__link">{{ 'common.details' | t }}</a>
+        </header>
+        <div class="panel__body">
+          <app-allocation [slices]="v.allocation" emptyKey="dash.nothingToShow" />
+        </div>
+      </section>
+    </div>
+
+    <div class="columns" [class.columns--1-1]="v.showTax">
+      @if (v.showTax) {
+        <section class="panel">
+          <header class="panel__header">
+            <h2>{{ 'dash.deadlines' | t }}</h2>
+            <a routerLink="/tax" class="panel__link">{{ 'dash.calendar' | t }}</a>
+          </header>
+          <app-deadline-list [deadlines]="v.deadlines" />
+          <p class="panel__footnote">{{ 'common.estimatesOnly' | t }}</p>
+        </section>
+      }
+
+      <section class="panel">
+        <header class="panel__header"><h2>{{ 'dash.activity' | t }}</h2></header>
+        <table class="table table--plain">
+          <tbody>
+            @for (a of v.recentActivity; track a.id) {
+              <tr>
+                <td class="nowrap muted">{{ a.date | localDate: 'short' }}</td>
+                <td>
+                  {{ activityText(a) }}<br>
+                  <small class="muted">{{ 'txType.' + a.type | t }} · {{ a.accountName ?? ('activity.freelance' | t) }}</small>
+                </td>
+                <td class="num nowrap" [ngClass]="{ positive: a.direction > 0 }">
+                  {{ a.direction < 0 ? '-' : (a.direction > 0 ? '+' : '') }}{{ a.amount | money: a.currency }}
+                </td>
+              </tr>
+            } @empty {
+              <tr><td class="muted">{{ 'dash.noActivity' | t }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </section>
+    </div>
+  }
+}

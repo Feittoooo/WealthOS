@@ -1,0 +1,64 @@
+<div class="toolbar">
+  <input type="search" class="toolbar__search" [placeholder]="'inv.filter' | t" [attr.aria-label]="'inv.filter' | t"
+         [(ngModel)]="search" (ngModelChange)="searchTerm.set($event)">
+  <select [ngModel]="typeFilter()" (ngModelChange)="typeFilter.set($event)" [attr.aria-label]="'form.assetType' | t">
+    <option value="">{{ 'inv.allTypes' | t }}</option>
+    @for (t of assetTypes; track t) { <option [value]="t">{{ 'assetType.' + t | t }}</option> }
+  </select>
+  @if (closedCount()) {
+    <label class="check check--inline">
+      <input type="checkbox" [checked]="showClosed()" (change)="showClosed.set($any($event.target).checked)">
+      <span>{{ 'inv.showClosed' | t: [closedCount()] }}</span>
+    </label>
+  }
+</div>
+
+<div class="table-scroll">
+  <table class="table">
+    <thead>
+      <tr>
+        <th><app-sort-button [sort]="sort" key="ticker" labelKey="inv.col.asset" /></th>
+        <th class="num"><app-sort-button [sort]="sort" key="quantity" labelKey="inv.col.quantity" /></th>
+        <th class="num"><app-sort-button [sort]="sort" key="currentPrice" labelKey="inv.col.price" /></th>
+        <th class="num"><app-sort-button [sort]="sort" key="costBasis" labelKey="inv.col.cost" /></th>
+        <th class="num"><app-sort-button [sort]="sort" key="marketValue" labelKey="inv.col.value" /></th>
+        <th class="num"><app-sort-button [sort]="sort" key="gain" labelKey="inv.col.gain" /></th>
+        <th class="num"><app-sort-button [sort]="sort" key="gainPct" labelKey="inv.col.return" /></th>
+        <th class="num"><app-sort-button [sort]="sort" key="weight" labelKey="inv.col.weight" /></th>
+        <th class="num"><app-sort-button [sort]="sort" key="lastDate" labelKey="inv.col.lastDate" /></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (a of rows(); track a.id) {
+        <tr class="row-link" tabindex="0" (click)="open(a)" (keydown.enter)="open(a)" [class.is-closed]="!a.open"
+            [attr.aria-label]="'inv.openAsset' | t: [a.ticker]">
+          <td>
+            <strong>{{ a.ticker }}</strong> <span class="tag">{{ 'assetType.' + a.assetType | t }}</span>
+            @if (a.operationsCount > 1) { <span class="tag" [title]="'inv.operationsCount' | t: [a.operationsCount]">×{{ a.operationsCount }}</span> }
+            <br>
+            <small class="muted">{{ a.name }} · {{ a.accountName }}</small>
+          </td>
+          <td class="num">{{ a.quantity | qty }}<br><small class="muted">{{ 'inv.avg' | t: [(a.avgBuyPrice | price: a.currency)] }}</small></td>
+          <td class="num">
+            {{ a.currentPrice | price: a.currency }}<br>
+            <small class="muted">
+              @if (a.autoPrice) { <app-icon name="lock" class="icon--inline" [attr.title]="'lock.on' | t" /> }
+              {{ a.priceUpdatedAt | relativeTime }}
+            </small>
+          </td>
+          <td class="num muted">{{ a.costBasis | money: a.currency }}</td>
+          <td class="num"><strong>{{ a.marketValue | money: a.currency }}</strong></td>
+          <td class="num" [ngClass]="a.gain | tone">{{ a.gain | money: a.currency : true }}</td>
+          <td class="num" [ngClass]="a.gainPct | tone">{{ a.gainPct | pct: true }}</td>
+          <td class="num">{{ a.weight | pct }}</td>
+          <td class="num nowrap">{{ a.lastDate | localDate }}<br><small class="muted">{{ 'inv.since' | t: [(a.firstDate | localDate)] }}</small></td>
+        </tr>
+      } @empty {
+        <tr><td colspan="9" class="muted">{{ 'inv.noMatch' | t }}</td></tr>
+      }
+    </tbody>
+  </table>
+</div>
+@if (filtered()) {
+  <p class="panel__footnote">{{ 'inv.filtered' | t: [rows().length, assets().length] }}</p>
+}

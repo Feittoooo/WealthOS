@@ -1,0 +1,110 @@
+<app-modal [open]="!!origin()" (closed)="closed.emit()" [wide]="true"
+           [title]="origin() ? ('transfer.title' | t: [origin()!.ticker]) : ''"
+           [subtitle]="'transfer.text' | t">
+  @if (origin(); as o) {
+    <form class="dialog__form" [formGroup]="form" (ngSubmit)="submit()">
+      <div class="dialog__body form">
+        <app-form-error [error]="error()" />
+
+        <fieldset class="fieldset">
+          <legend>{{ 'transfer.origin' | t }}</legend>
+          <p class="muted m-0">{{ o.name }} · {{ o.accountName }} ·
+            {{ 'inv.holding' | t: [(o.quantity | qty), (o.avgBuyPrice | price: o.currency), (o.currentPrice | price: o.currency)] }}</p>
+
+          <div class="field">
+            <span>{{ 'form.amount' | t }}</span>
+            <div class="input-group">
+              <app-segmented formControlName="mode" [options]="modeOptions" />
+              @if (form.value.mode !== 'ALL') {
+                <input type="number" step="any" min="0" formControlName="amount" class="num"
+                       [placeholder]="(form.value.mode === 'MONEY' ? 'form.amountMoneyPh' : 'form.amountUnitsPh') | t">
+              }
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="field">
+              <span>{{ 'transfer.date' | t }} <em>{{ 'form.optional' | t }}</em></span>
+              <input type="date" formControlName="date" [max]="today" [min]="o.firstDate ?? ''">
+              <small>{{ 'form.dateTodayHint' | t }}</small>
+            </label>
+            <label class="field">
+              <span>{{ 'transfer.originPrice' | t }} <em>{{ 'form.optional' | t }}</em></span>
+              <input type="number" step="any" min="0" formControlName="originPrice" class="num" [placeholder]="'form.priceOnDatePh' | t">
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend>{{ 'transfer.destination' | t }}</legend>
+          <app-segmented formControlName="destination" [options]="destinationOptions" />
+
+          @if (form.value.destination === 'EXISTING') {
+            @if (otherFunds().length) {
+              <label class="field">
+                <span>{{ 'transfer.fund' | t }}</span>
+                <select formControlName="destinationAssetId">
+                  @for (f of otherFunds(); track f.id) {
+                    <option [ngValue]="f.id">{{ f.ticker }} · {{ f.name }} ({{ f.accountName }})</option>
+                  }
+                </select>
+              </label>
+            } @else {
+              <p class="muted m-0">{{ 'transfer.noOtherFunds' | t }}</p>
+            }
+          } @else {
+            <div class="form-row form-row--2">
+              <label class="field">
+                <span>{{ 'form.account' | t }}</span>
+                <select formControlName="newAccountId">
+                  @for (a of accounts(); track a.id) { <option [ngValue]="a.id">{{ a.name }}</option> }
+                </select>
+              </label>
+              <label class="field">
+                <span>{{ 'form.ticker' | t }}</span>
+                <input formControlName="newTicker" maxlength="20" autocomplete="off" class="upper">
+              </label>
+              <label class="field">
+                <span>{{ 'form.isin' | t }} <em>{{ 'form.optional' | t }}</em></span>
+                <input formControlName="newIsin" maxlength="12" autocomplete="off" class="upper">
+              </label>
+              <label class="field">
+                <span>{{ 'form.name' | t }} <em>{{ 'form.optional' | t }}</em></span>
+                <input formControlName="newName" maxlength="120" autocomplete="off">
+              </label>
+            </div>
+            <div class="field">
+              <span>{{ 'transfer.newFundPrice' | t }}</span>
+              <app-lock-toggle formControlName="newAutoPrice" />
+            </div>
+          }
+
+          <label class="field">
+            <span>{{ 'transfer.destinationPrice' | t }} <em>{{ 'form.optional' | t }}</em></span>
+            <input type="number" step="any" min="0" formControlName="destinationPrice" class="num"
+                   [placeholder]="'form.priceOnDatePh' | t">
+          </label>
+        </fieldset>
+
+        <dl class="summary">
+          @if (preview(); as t) {
+            <div><dt>{{ 'transfer.unitsOut' | t }}</dt><dd [class.negative]="t.tooMuch">{{ t.units | qty }}</dd></div>
+            <div><dt>{{ 'transfer.value' | t }}</dt><dd>{{ t.value | money: o.currency }}</dd></div>
+            <div><dt>{{ 'transfer.costCarried' | t }}</dt><dd>{{ t.costCarried | money: o.currency }}</dd></div>
+            <div><dt>{{ 'transfer.unitsIn' | t }}</dt><dd>{{ t.unitsIn === null ? '-' : (t.unitsIn | qty) }}</dd></div>
+          } @else {
+            <p class="muted m-0">{{ 'inv.previewNeedsPrice' | t }}</p>
+          }
+        </dl>
+        <p class="muted m-0"><small>{{ 'transfer.taxNote' | t }}</small></p>
+      </div>
+
+      <div class="dialog__footer">
+        <button type="button" class="button" (click)="closed.emit()">{{ 'common.cancel' | t }}</button>
+        <button type="submit" class="button button--primary" [disabled]="saving() || preview()?.tooMuch">
+          {{ 'transfer.submit' | t }}
+        </button>
+      </div>
+    </form>
+  }
+</app-modal>

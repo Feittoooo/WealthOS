@@ -1,0 +1,83 @@
+<app-modal [open]="!!detail()" (closed)="closed.emit()" [wide]="true"
+           [title]="detail() ? detail()!.asset.ticker + ' · ' + detail()!.asset.name : ''"
+           [subtitle]="detail() ? detail()!.asset.accountName + (detail()!.asset.isin ? ' · ' + detail()!.asset.isin : '') : ''">
+  @if (detail(); as d) {
+    @let a = d.asset;
+    <div class="dialog__body">
+      <div class="asset-actions">
+        <button type="button" class="button button--primary" (click)="buyMore.emit(a)">
+          <app-icon name="plus" /> {{ 'asset.buyMore' | t }}
+        </button>
+        <button type="button" class="button" (click)="sell.emit(a)" [disabled]="!a.open">
+          <app-icon name="sell" /> {{ 'inv.sell' | t }}
+        </button>
+        @if (a.assetType === 'FUND') {
+          <button type="button" class="button" (click)="transfer.emit(a)" [disabled]="!a.open">
+            <app-icon name="transfer" /> {{ 'inv.transfer' | t }}
+          </button>
+        }
+        <button type="button" class="button" (click)="edit.emit(a)"><app-icon name="pencil" /> {{ 'common.edit' | t }}</button>
+        <button type="button" class="button button--danger asset-actions__right" (click)="remove.emit(a)">
+          <app-icon name="trash" /> {{ 'asset.delete' | t }}
+        </button>
+      </div>
+
+      <dl class="summary">
+        <div><dt>{{ 'inv.col.quantity' | t }}</dt><dd>{{ a.quantity | qty }}</dd></div>
+        <div><dt>{{ 'form.avgPrice' | t }}</dt><dd>{{ a.avgBuyPrice | price: a.currency }}</dd></div>
+        <div><dt>{{ 'inv.col.price' | t }}</dt><dd>{{ a.currentPrice | price: a.currency }}</dd></div>
+        <div><dt>{{ 'inv.col.cost' | t }}</dt><dd>{{ a.costBasis | money: a.currency }}</dd></div>
+        <div><dt>{{ 'inv.col.value' | t }}</dt><dd>{{ a.marketValue | money: a.currency }}</dd></div>
+        <div><dt>{{ 'inv.col.gain' | t }}</dt><dd [ngClass]="a.gain | tone">{{ a.gain | money: a.currency : true }} ({{ a.gainPct | pct: true }})</dd></div>
+        <div><dt>{{ 'inv.realised' | t }}</dt><dd [ngClass]="a.realisedGain | tone">{{ a.realisedGain | money: a.currency : true }}</dd></div>
+        <div><dt>{{ 'asset.period' | t }}</dt><dd>{{ a.firstDate | localDate }} – {{ a.lastDate | localDate }}</dd></div>
+      </dl>
+
+      <h3 class="section-title">{{ 'asset.operations' | t: [a.operationsCount] }}</h3>
+      <div class="table-scroll">
+        <table class="table">
+          <thead>
+            <tr>
+              <th><app-sort-button [sort]="sort" key="date" labelKey="form.date" /></th>
+              <th><app-sort-button [sort]="sort" key="type" labelKey="form.type" /></th>
+              <th class="num"><app-sort-button [sort]="sort" key="units" labelKey="inv.col.quantity" /></th>
+              <th class="num"><app-sort-button [sort]="sort" key="price" labelKey="inv.col.price" /></th>
+              <th class="num"><app-sort-button [sort]="sort" key="amount" labelKey="common.amount" /></th>
+              <th class="num"><app-sort-button [sort]="sort" key="realisedGain" labelKey="inv.realised" /></th>
+              <th class="num"><app-sort-button [sort]="sort" key="unitsAfter" labelKey="op.unitsAfter" /></th>
+              <th><span class="sr-only">{{ 'common.actions' | t }}</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (op of operations(); track op.id) {
+              <tr>
+                <td class="nowrap">{{ op.date | localDate }}</td>
+                <td>
+                  <span class="tag" [class.tag--positive]="op.type === 'BUY'" [class.tag--negative]="op.type === 'SELL'">{{ 'opType.' + op.type | t }}</span>
+                  @if (op.counterpart) {
+                    <br><small class="muted">{{ (op.type === 'TRANSFER_IN' ? 'op.from' : 'op.to') | t: [op.counterpart] }}</small>
+                  }
+                  @if (op.cashCredited) { <br><small class="muted">{{ 'op.cashCredited' | t }}</small> }
+                </td>
+                <td class="num">{{ op.units | qty }}</td>
+                <td class="num">{{ op.price | price: a.currency }}</td>
+                <td class="num">{{ op.amount | money: a.currency }}</td>
+                <td class="num" [ngClass]="op.realisedGain | tone">{{ op.realisedGain === null ? '-' : (op.realisedGain | money: a.currency : true) }}</td>
+                <td class="num muted">{{ op.unitsAfter | qty }}</td>
+                <td class="actions">
+                  @if (!isTransfer(op)) {
+                    <button type="button" class="icon-button" (click)="editOperation(op)" [title]="'common.edit' | t"><app-icon name="pencil" /></button>
+                  }
+                  <button type="button" class="icon-button icon-button--danger" (click)="deleteOperation(op)" [title]="'common.delete' | t"><app-icon name="trash" /></button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <app-operation-dialog [operation]="editing()" [ticker]="a.ticker" [currency]="a.currency"
+                          (closed)="editing.set(null)" (saved)="operationSaved($event)" />
+  }
+</app-modal>

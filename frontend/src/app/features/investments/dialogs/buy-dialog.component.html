@@ -1,0 +1,95 @@
+<app-modal [open]="open()" (closed)="closed.emit()"
+           [title]="asset() ? ('buy.moreTitle' | t: [asset()!.ticker]) : ('inv.addPosition' | t)"
+           [subtitle]="'buy.text' | t">
+  <form class="dialog__form" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="dialog__body form">
+      <app-form-error [error]="error()" />
+
+      <div class="form-row">
+        <label class="field">
+          <span>{{ 'form.account' | t }}</span>
+          <select formControlName="accountId">
+            @for (a of accounts(); track a.id) { <option [ngValue]="a.id">{{ a.name }}</option> }
+          </select>
+        </label>
+        <label class="field">
+          <span>{{ 'form.assetType' | t }}</span>
+          <select formControlName="assetType">
+            @for (t of assetTypes; track t) { <option [ngValue]="t">{{ 'assetType.' + t | t }}</option> }
+          </select>
+        </label>
+      </div>
+
+      <div class="form-row form-row--3">
+        <label class="field">
+          <span>{{ 'form.ticker' | t }}</span>
+          <input formControlName="ticker" maxlength="20" autocomplete="off" class="upper" [placeholder]="'form.tickerPh' | t">
+        </label>
+        <label class="field">
+          <span>{{ 'form.isin' | t }} <em>{{ 'form.optional' | t }}</em></span>
+          <input formControlName="isin" maxlength="12" autocomplete="off" class="upper" [placeholder]="'form.isinPh' | t">
+          @if (form.controls.isin.invalid && form.controls.isin.touched) {
+            <small class="text-negative">{{ 'val.position.isin.pattern' | t }}</small>
+          }
+        </label>
+        <label class="field">
+          <span>{{ 'form.name' | t }} <em>{{ 'form.optional' | t }}</em></span>
+          <input formControlName="name" maxlength="120" autocomplete="off">
+        </label>
+      </div>
+
+      @if (!asset() && target(); as t) {
+        <p class="notice">{{ 'buy.willMerge' | t: [t.ticker, (t.quantity | qty)] }}</p>
+      }
+
+      <div class="field">
+        <span>{{ 'form.amount' | t }}</span>
+        <div class="input-group">
+          <app-segmented formControlName="amountMode" [options]="modeOptions" />
+          <input type="number" step="any" min="0" formControlName="amount" class="num"
+                 [placeholder]="(form.value.amountMode === 'MONEY' ? 'form.amountMoneyPh' : 'form.amountUnitsPh') | t">
+        </div>
+      </div>
+
+      <div class="form-row form-row--3">
+        <label class="field">
+          <span>{{ 'form.purchaseDate' | t }} <em>{{ 'form.optional' | t }}</em></span>
+          <input type="date" formControlName="date" [max]="today">
+          <small>{{ 'form.purchaseDateHint' | t }}</small>
+        </label>
+        <label class="field">
+          <span>{{ 'form.buyPrice' | t }} <em>{{ 'form.optional' | t }}</em></span>
+          <input type="number" step="any" min="0" formControlName="price" class="num" [placeholder]="'form.avgPricePh' | t">
+          <small>{{ 'form.buyPriceHint' | t }}</small>
+        </label>
+        <div class="field">
+          <span>{{ 'form.currentPrice' | t }} <em>{{ 'form.optional' | t }}</em></span>
+          <div class="input-group">
+            <input type="number" step="any" min="0" formControlName="currentPrice" class="num"
+                   [placeholder]="(locked() ? 'form.currentPriceAuto' : 'form.currentPricePh') | t">
+            <app-lock-toggle formControlName="autoPrice" />
+          </div>
+          <small [class.text-warning]="locked() && !priceSource().available">
+            {{ (locked() ? (priceSource().available ? 'lock.onHint' : 'lock.noSource') : 'lock.offHint') | t }}
+          </small>
+        </div>
+      </div>
+
+      <dl class="summary">
+        @if (preview(); as p) {
+          <div><dt>{{ 'inv.col.quantity' | t }}</dt><dd>{{ p.units | qty }}</dd></div>
+          <div><dt>{{ 'inv.col.cost' | t }}</dt><dd>{{ p.cost | money }}</dd></div>
+          <div><dt>{{ 'inv.marketValue' | t }}</dt><dd>{{ p.value | money }}</dd></div>
+          <div><dt>{{ 'inv.col.gain' | t }}</dt><dd [class]="p.gain | tone">{{ p.gain | money: undefined : true }}</dd></div>
+        } @else {
+          <p class="muted m-0">{{ 'inv.previewMissing' | t }}</p>
+        }
+      </dl>
+    </div>
+
+    <div class="dialog__footer">
+      <button type="button" class="button" (click)="closed.emit()">{{ 'common.cancel' | t }}</button>
+      <button type="submit" class="button button--primary" [disabled]="saving()">{{ 'buy.submit' | t }}</button>
+    </div>
+  </form>
+</app-modal>

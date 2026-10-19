@@ -1,0 +1,60 @@
+<app-modal [open]="!!asset()" (closed)="closed.emit()"
+           [title]="asset() ? ('inv.editTitle' | t: [asset()!.ticker]) : ''"
+           [subtitle]="'asset.editText' | t">
+  <form class="dialog__form" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="dialog__body form">
+      <app-form-error [error]="error()" />
+
+      <div class="form-row">
+        <label class="field">
+          <span>{{ 'form.ticker' | t }}</span>
+          <input formControlName="ticker" maxlength="20" autocomplete="off" class="upper">
+        </label>
+        <label class="field">
+          <span>{{ 'form.isin' | t }} <em>{{ 'form.optional' | t }}</em></span>
+          <input formControlName="isin" maxlength="12" autocomplete="off" class="upper" [placeholder]="'form.isinPh' | t">
+          @if (form.controls.isin.invalid && form.controls.isin.touched) {
+            <small class="text-negative">{{ 'val.position.isin.pattern' | t }}</small>
+          }
+        </label>
+      </div>
+
+      <div class="form-row">
+        <label class="field">
+          <span>{{ 'form.name' | t }}</span>
+          <input formControlName="name" maxlength="120" autocomplete="off">
+        </label>
+        <label class="field">
+          <span>{{ 'form.assetType' | t }}</span>
+          <select formControlName="assetType">
+            @for (t of assetTypes; track t) { <option [ngValue]="t">{{ 'assetType.' + t | t }}</option> }
+          </select>
+        </label>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <span>{{ 'form.currentPrice' | t }}</span>
+          <div class="input-group">
+            <input type="number" step="any" min="0" formControlName="currentPrice" class="num"
+                   [placeholder]="(locked() ? 'form.currentPriceAuto' : 'form.currentPricePh') | t">
+            <app-lock-toggle formControlName="autoPrice" />
+          </div>
+          <small [class.text-warning]="locked() && !priceSource().available">
+            {{ (locked() ? (priceSource().available ? 'lock.onHint' : 'lock.noSource') : 'lock.offHint') | t }}
+          </small>
+        </div>
+        <label class="field">
+          <span>{{ 'form.priceSymbol' | t }} <em>{{ 'form.optional' | t }}</em></span>
+          <input formControlName="priceSymbol" maxlength="40" autocomplete="off">
+          <small>{{ 'form.priceSymbolHint' | t }}</small>
+        </label>
+      </div>
+    </div>
+
+    <div class="dialog__footer">
+      <button type="button" class="button" (click)="closed.emit()">{{ 'common.cancel' | t }}</button>
+      <button type="submit" class="button button--primary" [disabled]="saving()">{{ 'common.save' | t }}</button>
+    </div>
+  </form>
+</app-modal>

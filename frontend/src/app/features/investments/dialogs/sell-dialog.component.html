@@ -1,0 +1,60 @@
+<app-modal [open]="!!asset()" (closed)="closed.emit()"
+           [title]="asset() ? ('inv.sellTitle' | t: [asset()!.ticker]) : ''"
+           [subtitle]="'inv.sellDialogText' | t">
+  @if (asset(); as p) {
+    <form class="dialog__form" [formGroup]="form" (ngSubmit)="submit()">
+      <div class="dialog__body form">
+        <app-form-error [error]="error()" />
+
+        <p class="muted m-0">{{ 'inv.holding' | t: [(p.quantity | qty), (p.avgBuyPrice | price: p.currency), (p.currentPrice | price: p.currency)] }}</p>
+
+        <div class="field">
+          <span>{{ 'form.amount' | t }}</span>
+          <div class="input-group">
+            <app-segmented formControlName="mode" [options]="modeOptions" />
+            @if (form.value.mode !== 'ALL') {
+              <input type="number" step="any" min="0" formControlName="amount" class="num"
+                     [placeholder]="(form.value.mode === 'MONEY' ? 'form.amountMoneyPh' : 'form.amountUnitsPh') | t">
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label class="field">
+            <span>{{ 'form.saleDate' | t }} <em>{{ 'form.optional' | t }}</em></span>
+            <input type="date" formControlName="date" [max]="today" [min]="p.firstDate ?? ''">
+            <small>{{ 'form.dateTodayHint' | t }}</small>
+          </label>
+          <label class="field">
+            <span>{{ 'form.salePrice' | t }} <em>{{ 'form.optional' | t }}</em></span>
+            <input type="number" step="any" min="0" formControlName="price" class="num" [placeholder]="'form.priceOnDatePh' | t">
+            <small>{{ 'form.priceOnDateHint' | t }}</small>
+          </label>
+        </div>
+
+        <label class="check">
+          <input type="checkbox" formControlName="creditCash">
+          <span>{{ 'inv.creditCash' | t }}<small>{{ 'inv.creditCashHint' | t }}</small></span>
+        </label>
+
+        <dl class="summary">
+          @if (preview(); as s) {
+            <div><dt>{{ 'inv.col.quantity' | t }}</dt><dd [class.negative]="s.tooMuch">{{ s.units | qty }}</dd></div>
+            <div><dt>{{ 'inv.proceeds' | t }}</dt><dd>{{ s.proceeds | money: p.currency }}</dd></div>
+            <div><dt>{{ 'inv.realised' | t }}</dt><dd [class]="s.realised | tone">{{ s.realised | money: p.currency : true }}</dd></div>
+            <div><dt>{{ 'inv.remaining' | t }}</dt><dd>{{ s.remaining | qty }}</dd></div>
+          } @else {
+            <p class="muted m-0">{{ 'inv.previewNeedsPrice' | t }}</p>
+          }
+        </dl>
+      </div>
+
+      <div class="dialog__footer">
+        <button type="button" class="button" (click)="closed.emit()">{{ 'common.cancel' | t }}</button>
+        <button type="submit" class="button button--primary" [disabled]="saving() || preview()?.tooMuch">
+          {{ 'inv.recordSale' | t }}
+        </button>
+      </div>
+    </form>
+  }
+</app-modal>

@@ -1,0 +1,162 @@
+<header class="page-header">
+  <div>
+    <h1>{{ 'nav.debug' | t }}</h1>
+    <p class="muted">{{ 'debug.subtitle' | t }}</p>
+  </div>
+  <div class="page-header__actions">
+    <a class="button" href="/swagger-ui.html" target="_blank" rel="noopener">{{ 'debug.apiDocs' | t }}</a>
+    <a class="button" href="/h2-console" target="_blank" rel="noopener">{{ 'debug.h2' | t }}</a>
+    <button type="button" class="button" (click)="reloadTexts()">{{ 'debug.reloadTexts' | t }}</button>
+    <button type="button" class="button" (click)="refreshPrices()">{{ 'debug.refreshPrices' | t }}</button>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="segmented" role="tablist">
+    @for (t of tabs; track t) {
+      <button type="button" role="tab" [class.is-active]="tab() === t" [attr.aria-selected]="tab() === t" (click)="show(t)">
+        {{ 'debug.tab.' + t | t }}
+      </button>
+    }
+  </div>
+  <input type="search" class="toolbar__search" [placeholder]="'debug.filterRequest' | t"
+         [ngModel]="requestFilter()" (ngModelChange)="requestFilter.set($event)">
+</div>
+
+@switch (tab()) {
+  @case ('browser') {
+    <section class="panel">
+      <header class="panel__header">
+        <h2>{{ 'debug.tab.browser' | t }}</h2>
+        <label class="check check--inline">
+          <input type="checkbox" [checked]="browserLog.mirrorToConsole()" (change)="browserLog.setConsoleMirror($any($event.target).checked)">
+          <span>{{ 'debug.mirrorConsole' | t }}</span>
+        </label>
+        <button type="button" class="button button--small" (click)="browserLog.clear()">{{ 'debug.clear' | t }}</button>
+      </header>
+      <div class="table-scroll">
+        <table class="table table--log">
+          <thead><tr><th>{{ 'debug.time' | t }}</th><th>{{ 'debug.level' | t }}</th><th>{{ 'debug.source' | t }}</th><th>{{ 'debug.message' | t }}</th><th class="num">{{ 'debug.status' | t }}</th><th class="num">ms</th><th>id</th></tr></thead>
+          <tbody>
+            @for (e of browserEntries(); track e.id) {
+              <tr [ngClass]="'level-' + e.level" (click)="expanded.set(expanded() === e.id ? null : e.id)" class="row-link">
+                <td class="nowrap">{{ e.time.toLocaleTimeString() }}</td>
+                <td>{{ e.level }}</td>
+                <td>{{ e.source }}</td>
+                <td class="mono">{{ e.message }}</td>
+                <td class="num">{{ e.status ?? '' }}</td>
+                <td class="num">{{ e.durationMs ?? '' }}</td>
+                <td><button type="button" class="link mono" (click)="follow(e.requestId); $event.stopPropagation()">{{ e.requestId ?? '' }}</button></td>
+              </tr>
+              @if (expanded() === e.id && e.detail !== undefined) {
+                <tr><td colspan="7"><pre class="code">{{ e.detail | json }}</pre></td></tr>
+              }
+            } @empty {
+              <tr><td colspan="7" class="muted">{{ 'debug.empty' | t }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+
+  @case ('requests') {
+    <section class="panel">
+      <header class="panel__header">
+        <h2>{{ 'debug.tab.requests' | t }}</h2>
+        <button type="button" class="button button--small" (click)="show('requests')">{{ 'debug.refresh' | t }}</button>
+      </header>
+      <div class="table-scroll">
+        <table class="table table--log">
+          <thead><tr><th>{{ 'debug.time' | t }}</th><th>id</th><th>{{ 'debug.method' | t }}</th><th>{{ 'debug.path' | t }}</th><th class="num">{{ 'debug.status' | t }}</th><th class="num">ms</th><th>{{ 'lang.title' | t }}</th></tr></thead>
+          <tbody>
+            @for (r of requests(); track r.id + r.time) {
+              <tr [ngClass]="{ 'level-error': r.status >= 500, 'level-warn': r.status >= 400 && r.status < 500 }">
+                <td class="nowrap">{{ clock(r.time) }}</td>
+                <td><button type="button" class="link mono" (click)="follow(r.id)">{{ r.id }}</button></td>
+                <td>{{ r.method }}</td>
+                <td class="mono">{{ r.path }}</td>
+                <td class="num">{{ r.status }}</td>
+                <td class="num">{{ r.durationMs }}</td>
+                <td>{{ r.language }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="7" class="muted">{{ 'debug.empty' | t }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+
+  @case ('logs') {
+    <section class="panel">
+      <header class="panel__header">
+        <h2>{{ 'debug.tab.logs' | t }}</h2>
+        <select [ngModel]="logLevel()" (ngModelChange)="logLevel.set($event); changeLogLevel()">
+          @for (l of levels.slice(0, 5); track l) { <option [value]="l">{{ l }}</option> }
+        </select>
+        <label class="check check--inline">
+          <input type="checkbox" [checked]="following()" (change)="following.set($any($event.target).checked)">
+          <span>{{ 'debug.live' | t }}</span>
+        </label>
+        <button type="button" class="button button--small" (click)="clearServer()">{{ 'debug.clear' | t }}</button>
+      </header>
+      <div class="table-scroll">
+        <table class="table table--log">
+          <thead><tr><th>{{ 'debug.time' | t }}</th><th>{{ 'debug.level' | t }}</th><th>id</th><th>logger</th><th>{{ 'debug.message' | t }}</th></tr></thead>
+          <tbody>
+            @for (l of serverLogs(); track l.id) {
+              <tr [ngClass]="'level-' + l.level.toLowerCase()">
+                <td class="nowrap">{{ clock(l.time, true) }}</td>
+                <td>{{ l.level }}</td>
+                <td><button type="button" class="link mono" (click)="follow(l.requestId)">{{ l.requestId ?? '' }}</button></td>
+                <td class="mono muted">{{ l.logger.split('.').pop() }}</td>
+                <td class="mono">{{ l.message }}@if (l.stackTrace) { <pre class="code">{{ l.stackTrace }}</pre> }</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5" class="muted">{{ 'debug.empty' | t }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+
+  @case ('loggers') {
+    <section class="panel">
+      <header class="panel__header"><h2>{{ 'debug.tab.loggers' | t }}</h2><span class="panel__note">{{ 'debug.loggersHint' | t }}</span></header>
+      <table class="table">
+        <tbody>
+          @for (l of loggers(); track l.name) {
+            <tr>
+              <td class="mono">{{ l.name }}</td>
+              <td>
+                <select [value]="l.level" (change)="setLoggerLevel(l.name, $any($event.target).value)">
+                  @for (level of levels; track level) { <option [value]="level" [selected]="level === l.level">{{ level }}</option> }
+                </select>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  }
+
+  @case ('system') {
+    <section class="panel">
+      <header class="panel__header"><h2>{{ 'debug.tab.system' | t }}</h2></header>
+      @if (info(); as i) {
+        <table class="table">
+          <tbody>
+            @for (row of entries(i); track row[0]) {
+              <tr><td class="mono">{{ row[0] }}</td><td class="mono">{{ row[1] | json }}</td></tr>
+            }
+            <tr><td class="mono">frontend.language</td><td class="mono">{{ i18n.language() }}</td></tr>
+            <tr><td class="mono">frontend.app</td><td class="mono">{{ app.info() | json }}</td></tr>
+          </tbody>
+        </table>
+      }
+    </section>
+  }
+}

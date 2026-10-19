@@ -1,0 +1,88 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+body {
+  font: 13px/1.45 var(--font);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { margin: 0; font-weight: 600; }
+h1 { font-size: 18px; }
+h2 { font-size: 13px; }
+p { margin: 0 0 8px; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+hr { border: 0; border-top: 1px solid var(--border); margin: 4px 0; }
+small { font-size: 11.5px; }
+pre.code {
+  margin: 4px 0 0;
+  padding: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font: 11.5px/1.4 var(--mono);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 320px;
+  overflow: auto;
+}
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+// --- helpers
+.muted { color: var(--text-muted); }
+.positive, .text-positive { color: var(--positive); }
+.negative, .text-negative { color: var(--negative); }
+.neutral { color: inherit; }
+.text-warning { color: var(--warning); }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.nowrap { white-space: nowrap; }
+.mono { font-family: var(--mono); font-size: 12px; }
+.upper { text-transform: uppercase; }
+.upper::placeholder { text-transform: none; }
+.m-0 { margin: 0; }
+.indent { padding-left: 24px !important; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+.icon { display: inline-flex; width: 15px; height: 15px; flex-shrink: 0; vertical-align: -3px; }
+.icon svg { width: 100%; height: 100%; }
+.icon--inline { width: 12px; height: 12px; vertical-align: -1px; }
+
+.tag {
+  display: inline-block;
+  padding: 0 5px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  vertical-align: 1px;
+}
+.tag + .tag, strong + .tag { margin-left: 4px; }
+.tag--positive { color: var(--positive); border-color: currentColor; }
+.tag--negative { color: var(--negative); border-color: currentColor; }
+
+.swatch {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 6px;
+  border-radius: 2px;
+}
+
+.notice {
+  padding: 8px 12px;
+  margin-bottom: 14px;
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.notice--warning { border-left-color: var(--warning); background: var(--warning-bg); }
+
+.footnote { margin-top: 16px; color: var(--text-muted); font-size: 12px; }

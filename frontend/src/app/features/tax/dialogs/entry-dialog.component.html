@@ -1,0 +1,74 @@
+<app-modal [open]="open()" (closed)="closed.emit()"
+           [title]="(entry() ? 'tax.entryModal.edit' : 'tax.entryModal.new') | t"
+           [subtitle]="'tax.entryModal.text' | t">
+  <form class="dialog__form" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="dialog__body form">
+      <app-form-error [error]="error()" />
+
+      <app-segmented formControlName="type" [options]="typeOptions" />
+
+      <div class="form-row">
+        <label class="field">
+          <span>{{ 'tax.col.date' | t }}</span>
+          <input type="date" formControlName="date">
+        </label>
+        <label class="field">
+          <span>{{ 'form.category' | t }} <em>{{ 'form.optional' | t }}</em></span>
+          <input formControlName="category" maxlength="60" list="entry-categories" autocomplete="off">
+          <datalist id="entry-categories">
+            @for (c of categories(); track c) { <option [value]="c"></option> }
+          </datalist>
+        </label>
+      </div>
+
+      <label class="field">
+        <span>{{ 'tax.col.concept' | t }}</span>
+        <input formControlName="concept" maxlength="160" autocomplete="off" [placeholder]="'form.conceptPh' | t">
+      </label>
+
+      <label class="field">
+        <span>{{ (isIncome() ? 'form.client' : 'form.supplier') | t }} <em>{{ 'form.optional' | t }}</em></span>
+        <input formControlName="counterparty" maxlength="120" autocomplete="off">
+      </label>
+
+      <div class="form-row form-row--3">
+        <label class="field">
+          <span>{{ 'form.baseAmount' | t }}</span>
+          <input type="number" step="0.01" min="0" formControlName="baseAmount" class="num">
+        </label>
+        <label class="field">
+          <span>IVA</span>
+          <select formControlName="ivaRate">
+            @for (r of ivaRates; track r) { <option [ngValue]="r">{{ 'tax.iva' + r | t }}</option> }
+          </select>
+        </label>
+        @if (isIncome()) {
+          <label class="field">
+            <span>{{ 'form.irpf' | t }}</span>
+            <select formControlName="irpfRetentionRate">
+              @for (r of irpfRates; track r) { <option [ngValue]="r">{{ 'tax.irpf' + r | t }}</option> }
+            </select>
+          </label>
+        }
+      </div>
+
+      @if (!isIncome()) {
+        <label class="check">
+          <input type="checkbox" formControlName="deductible">
+          <span>{{ 'form.deductible' | t }}<small>{{ 'form.deductibleHint' | t }}</small></span>
+        </label>
+      }
+
+      <dl class="summary">
+        <div><dt>IVA</dt><dd>{{ preview().iva | money }}</dd></div>
+        @if (isIncome()) { <div><dt>{{ 'tax.preview.withheld' | t }}</dt><dd>-{{ preview().withheld | money }}</dd></div> }
+        <div><dt>{{ 'tax.preview.total' | t }}</dt><dd>{{ preview().total | money }}</dd></div>
+      </dl>
+    </div>
+
+    <div class="dialog__footer">
+      <button type="button" class="button" (click)="closed.emit()">{{ 'common.cancel' | t }}</button>
+      <button type="submit" class="button button--primary" [disabled]="saving()">{{ 'common.save' | t }}</button>
+    </div>
+  </form>
+</app-modal>

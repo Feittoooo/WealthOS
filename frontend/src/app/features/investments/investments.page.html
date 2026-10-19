@@ -1,0 +1,97 @@
+<header class="page-header">
+  <div>
+    <h1>{{ 'nav.investments' | t }}</h1>
+    <p class="muted">{{ 'inv.subtitle' | t }}</p>
+  </div>
+  <div class="page-header__actions">
+    <button type="button" class="button" (click)="accountDialog.set({ account: null })">{{ 'inv.newAccount' | t }}</button>
+    <button type="button" class="button button--primary" (click)="newPurchase()">{{ 'inv.addPosition' | t }}</button>
+  </div>
+</header>
+
+@if (!overview()) {
+  <p class="muted">{{ 'common.loading' | t }}</p>
+}
+
+@if (overview(); as o) {
+  <section class="stats">
+    <div class="stat">
+      <span class="stat__label">{{ 'inv.currentValue' | t }}</span>
+      <strong class="stat__value">{{ o.summary.marketValue | money }}</strong>
+      <span class="stat__meta">{{ 'inv.positionsCount' | t: [o.summary.positionsCount] }}</span>
+    </div>
+    <div class="stat">
+      <span class="stat__label">{{ 'inv.invested' | t }}</span>
+      <strong class="stat__value">{{ o.summary.totalInvested | money }}</strong>
+      <span class="stat__meta">{{ 'inv.costOfOpen' | t }}</span>
+    </div>
+    <div class="stat">
+      <span class="stat__label">{{ 'inv.totalReturn' | t }}</span>
+      <strong class="stat__value" [ngClass]="o.summary.totalReturn | tone">{{ o.summary.totalReturn | money: undefined : true }}</strong>
+      <span class="stat__meta" [ngClass]="o.summary.totalReturnPct | tone">{{ o.summary.totalReturnPct | pct: true }}</span>
+    </div>
+    <div class="stat">
+      <span class="stat__label">{{ 'common.cash' | t }}</span>
+      <strong class="stat__value">{{ o.summary.totalCash | money }}</strong>
+      <span class="stat__meta">{{ 'inv.cashNotInvested' | t }}</span>
+    </div>
+  </section>
+
+  @if (!o.accounts.length) {
+    <section class="panel">
+      <app-empty-state titleKey="inv.startWithAccount" textKey="inv.startWithAccountText">
+        <button type="button" class="button button--primary" (click)="accountDialog.set({ account: null })">{{ 'inv.newAccount' | t }}</button>
+      </app-empty-state>
+    </section>
+  } @else {
+    <div class="columns columns--1-1">
+      <section class="panel">
+        <header class="panel__header"><h2>{{ 'inv.byType' | t }}</h2></header>
+        <div class="panel__body"><app-allocation [slices]="o.byType" emptyKey="inv.noPositions" /></div>
+      </section>
+      <section class="panel">
+        <header class="panel__header"><h2>{{ 'inv.byAccount' | t }}</h2></header>
+        <div class="panel__body"><app-allocation [slices]="o.byAccount" /></div>
+      </section>
+    </div>
+
+    <section class="panel">
+      <header class="panel__header">
+        <h2>{{ 'inv.assets' | t }}</h2>
+        <span class="panel__note">{{ 'inv.assetsSub' | t }}@if (!o.priceSource.available) { · {{ 'inv.manualPrices' | t }} }</span>
+      </header>
+      @if (o.assets.length) {
+        <app-assets-table [assets]="o.assets" (opened)="openAsset($event)" />
+      } @else {
+        <app-empty-state titleKey="inv.noPositions" textKey="inv.firstPositionText">
+          <button type="button" class="button button--primary" (click)="newPurchase()">{{ 'inv.addPosition' | t }}</button>
+        </app-empty-state>
+      }
+    </section>
+
+    <section class="panel">
+      <header class="panel__header">
+        <h2>{{ 'inv.accounts' | t }}</h2>
+        <span class="panel__note">{{ 'inv.accountsSub' | t }}</span>
+      </header>
+      <app-accounts-table [accounts]="o.accounts" (edit)="accountDialog.set({ account: $event })" (remove)="deleteAccount($event)" />
+    </section>
+  }
+
+  <p class="footnote">{{ 'inv.footer' | t }}</p>
+
+  <app-account-dialog [open]="!!accountDialog()" [account]="accountDialog()?.account ?? null"
+                      (closed)="accountDialog.set(null)" (saved)="accountSaved($event)" />
+  <app-buy-dialog [open]="!!buyDialog()" [asset]="buyDialog()?.asset ?? null"
+                  [accounts]="o.accounts" [assets]="o.assets" [priceSource]="o.priceSource"
+                  (closed)="buyDialog.set(null)" (saved)="bought($event)" />
+  <app-asset-detail-dialog [detail]="detail()" (closed)="detail.set(null)"
+                           (buyMore)="buyDialog.set({ asset: $event })" (sell)="selling.set($event)"
+                           (transfer)="transferring.set($event)" (edit)="editing.set($event)"
+                           (remove)="deleteAsset($event)" (changed)="operationsChanged($event)" />
+  <app-asset-edit-dialog [asset]="editing()" [priceSource]="o.priceSource"
+                         (closed)="editing.set(null)" (saved)="assetSaved($event)" />
+  <app-sell-dialog [asset]="selling()" (closed)="selling.set(null)" (sold)="sold($event)" />
+  <app-transfer-dialog [origin]="transferring()" [assets]="o.assets" [accounts]="o.accounts"
+                       (closed)="transferring.set(null)" (transferred)="transferred($event)" />
+}

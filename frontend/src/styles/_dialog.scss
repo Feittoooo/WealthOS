@@ -1,0 +1,40 @@
+.dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+
+  &::backdrop { background: rgba(0, 0, 0, 0.45); }
+}
+.dialog--wide { width: min(900px, calc(100vw - 32px)); }
+
+.dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  h2 { font-size: 14px; }
+  p { margin: 2px 0 0; color: var(--text-muted); font-size: 12px; }
+}
+
+.dialog__form { display: contents; }
+.dialog__body { padding: 14px; overflow-y: auto; }
+.dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+}
+
+// asset detail: actions on the whole asset, then its operations
+.dialog--wide .dialog__body { display: flex; flex-direction: column; gap: 12px; }
+.asset-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.asset-actions__right { margin-left: auto; }
+.section-title { margin: 4px 0 0; font-size: 13px; font-weight: 600; }
