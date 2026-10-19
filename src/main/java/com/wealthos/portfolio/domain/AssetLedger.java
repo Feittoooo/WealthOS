@@ -92,9 +92,11 @@ public final class AssetLedger {
         return lines.isEmpty() ? BigDecimal.ZERO : lines.get(lines.size() - 1).costAfter().setScale(2, RoundingMode.HALF_UP);
     }
 
+    // from the unrounded cost: rounding it to cents first moves the average after a partial sale
     public BigDecimal averagePrice() {
         BigDecimal u = units();
-        return u.signum() == 0 ? BigDecimal.ZERO : cost().divide(u, 6, RoundingMode.HALF_UP);
+        if (u.signum() == 0) return BigDecimal.ZERO;
+        return lines.get(lines.size() - 1).costAfter().divide(u, 6, RoundingMode.HALF_UP);
     }
 
     public BigDecimal realisedGain() {

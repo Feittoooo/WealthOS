@@ -107,6 +107,19 @@ Mientras no haya fuente de precios, el gráfico de patrimonio solo conoce los pr
 
 Todavía no hay una fuente de precios real. Todo pasa por la interfaz `PriceProvider`, y la implementación por defecto, `NoPriceProvider`, nunca responde, así que de momento hay que escribir al menos un precio. La issue #1 añade una implementación con Yahoo Finance; el candado, las reglas de los campos vacíos, las ventas y traspasos en fechas pasadas y la actualización diaria la usarán sin más cambios. `WithPriceSourceTest` ya comprueba todo eso con un proveedor de pega.
 
+### Cómo se calculan las plusvalías
+
+Cada activo se recalcula a partir de sus operaciones por orden de fecha, a coste medio:
+
+- Una venta realiza `participaciones × (precio de venta − coste medio)`. Los traspasos entre fondos no realizan nada; su coste pasa al fondo de destino.
+- Las participaciones se guardan con 8 decimales y nunca se redondean, así que las cantidades pequeñas de cripto son exactas. El dinero solo se redondea a céntimos al mostrarlo y en la plusvalía de cada venta.
+- Vender justo al precio medio da una plusvalía de 0,00 exactos.
+- Los precios tienen que ser mayores que cero. Para un regalo o un airdrop, indica su valor de mercado el día que lo recibiste.
+- Editar o borrar una compra antigua recalcula todas las ventas posteriores. Se rechaza cualquier cambio que te deje vendiendo más de lo que tenías.
+- La plusvalía de cada venta aparece en su operación y se suma por activo. No se guarda aparte, así que nunca se queda desfasada.
+
+El IRPF usa FIFO, no el coste medio, para acciones y fondos, así que estas plusvalías son una estimación. El FIFO está en el roadmap.
+
 ### Depuración
 
 La página **Depuración** de la barra lateral muestra:

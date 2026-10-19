@@ -107,6 +107,19 @@ Until there's a price source, the net worth chart only knows the prices of your 
 
 There's no real price source yet. Everything goes through the `PriceProvider` interface and the default `NoPriceProvider` never answers, so for now you type at least one price. Issue #1 adds a Yahoo Finance implementation; the lock, the empty-field rules, sales and transfers on past dates and the daily refresh will use it without other changes. `WithPriceSourceTest` already runs all of that against a fake provider.
 
+### How gains are worked out
+
+Each asset is replayed from its operations in date order, using average cost:
+
+- A sale realises `units × (sale price − average cost)`. Fund transfers realise nothing; their cost moves to the destination fund.
+- Units are stored with 8 decimals and never rounded, so small crypto amounts are exact. Money is rounded to cents only for display and for each sale's gain.
+- Selling at exactly the average price gives a gain of exactly 0.00.
+- Prices must be above zero. For a gift or an airdrop, enter its market value on the day you got it.
+- Editing or deleting an old purchase recalculates every sale after it. A change that would leave you selling more than you held is refused.
+- Each sale's gain is shown on the operation and added up per asset. Nothing is stored separately, so it can't go out of date.
+
+Spain's IRPF uses FIFO, not average cost, for shares and funds, so the gains here are an estimate. FIFO is on the roadmap.
+
 ### Debugging
 
 The **Debug** page in the sidebar shows:
