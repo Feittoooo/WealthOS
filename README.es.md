@@ -191,4 +191,4 @@ El módulo de impuestos solo da estimaciones. Revisa siempre las cifras con tu g
 
 Esto no es asesoramiento fiscal, legal ni financiero. Los cálculos dan por hecho estimación directa, régimen general de IVA y una sola actividad. No contemplan la prorrata, el recargo de equivalencia, las operaciones intracomunitarias, los gastos de difícil justificación, los festivos autonómicos ni muchos otros casos. Los plazos pueden cambiar de un año a otro. No me hago responsable de las decisiones que se tomen con este software.
 
-Sobre la privacidad: tus datos se quedan en un fichero H2 local en el equipo donde corre WealthOS. Las fuentes y los gráficos van incluidos en la aplicación, así que no hace ninguna petición al exterior.
+Sobre la privacidad: WealthOS es solo para tus propios registros, y tus datos se quedan en un fichero H2 local en el equipo donde corre WealthOS. El cliente o proveedor de un apunte fiscal es solo el nombre que figura en tu factura. Las fuentes y los gráficos van incluidos en la aplicación, así que no hace ninguna petición al exterior.

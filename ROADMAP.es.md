@@ -35,13 +35,12 @@ Más o menos en el orden en que quiero hacer las cosas. Sin fechas, que es un pr
 - Modelo 390, generado a partir de los cuatro 303 del año.
 - PDF prerrellenados que siguen las casillas oficiales.
 - Histórico fiscal de varios años.
-- Modelos 111 y 115, para autónomos con empleados o con local alquilado.
 - Festivos autonómicos que mueven los plazos, y los regímenes del País Vasco y Navarra.
 
 ## Fase 4: Inteligencia
 
 - Un asistente para dudas fiscales. Por defecto, un modelo local con Ollama para que no salga nada de tu equipo; un modelo en la nube solo si tú añades una clave de API.
-- Categorías automáticas para los gastos, aprendiendo de cómo los has clasificado antes.
+- Categorías sugeridas para los gastos, con reglas sencillas: un apunte con el mismo proveedor o un concepto parecido recibe la categoría que usaste la última vez. No se entrena ningún modelo.
 - Sugerencias para pagar menos impuestos de forma legal: deducciones que se te escapan, cuánto apartar, retención del 7 % o del 15 %.
 - Comparativa con índices como el IBEX 35, el S&P 500 o el MSCI World.
 - Avisos por correo o Telegram de plazos, movimientos fuertes de precio, precios desactualizados y la cuota.
@@ -53,8 +52,9 @@ Más o menos en el orden en que quiero hacer las cosas. Sin fechas, que es un pr
 - APIs de brókers: DEGIRO (no oficial) e Interactive Brokers.
 - Descargar documentos de Hacienda con tu certificado digital: datos fiscales, declaraciones presentadas y notificaciones.
 - Sincronización de solo lectura con exchanges y monederos cripto.
-- Varios usuarios o una vista compartida del hogar, con autenticación de verdad.
 
 ## Lo que no va a cambiar
+
+WealthOS es para tus propios registros: tus cuentas, tus inversiones y tu propia contabilidad de autónomo. En los apuntes fiscales, el cliente o proveedor es solo el nombre que figura en tu factura. Las nóminas, los modelos fiscales de otras personas y las vistas que mezclan las finanzas de varias personas quedan fuera.
 
 Tus datos se quedan en tu equipo. Todo lo que se conecte a un servicio externo será opcional y estará documentado. Las cifras fiscales siempre dirán que son estimaciones y qué dan por hecho. Y seguirá siendo un único jar que se arranca teniendo solo Java instalado.
