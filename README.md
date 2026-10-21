@@ -191,4 +191,4 @@ The tax module gives estimates only. Always check the numbers with a gestor or t
 
 This isn't tax, legal or financial advice. The calculations assume estimación directa, the general IVA regime and a single activity. They don't handle prorrata, recargo de equivalencia, intra-EU operations, gastos de difícil justificación, regional holidays and plenty of other cases. Deadlines can change from one year to the next. I take no responsibility for decisions made with this software.
 
-About privacy: your data stays in a local H2 file on the machine running WealthOS. Fonts and charts are bundled with the app, so it makes no outside requests at all.
+About privacy: WealthOS is for your own records only, and your data stays in a local H2 file on the machine running WealthOS. The client or supplier on a tax entry is just the name on your invoice. Fonts and charts are bundled with the app, so it makes no outside requests at all.

@@ -35,13 +35,12 @@ Roughly in the order I want to do things. No dates, this is a side project. Many
 - Modelo 390, built from the four 303s of the year.
 - Pre-filled PDFs that follow the official boxes (casillas).
 - Tax history across several years.
-- Modelos 111 and 115, for autónomos with employees or a rented office.
 - Regional holidays that move deadlines, and the Basque Country and Navarre regimes.
 
 ## Phase 4: Intelligence
 
 - An assistant for tax questions. By default a local model through Ollama so nothing leaves your machine; a hosted model only if you add an API key yourself.
-- Automatic categories for expenses, learning from how you've labelled things before.
+- Suggested categories for expenses, from simple rules: an entry with the same supplier or a similar concept gets the category you used last time. No model is trained.
 - Suggestions to pay less tax legally: missed deductions, how much to set aside, 7% vs 15% withholding.
 - Comparison against indexes like the IBEX 35, the S&P 500 or the MSCI World.
 - Alerts by email or Telegram for deadlines, big price moves, stale prices and the cuota.
@@ -53,8 +52,9 @@ Roughly in the order I want to do things. No dates, this is a side project. Many
 - Broker APIs: DEGIRO (unofficial) and Interactive Brokers.
 - Downloading documents from Hacienda with your digital certificate: datos fiscales, filed returns, notifications.
 - Read-only sync for crypto exchanges and wallets.
-- Several users or a shared household view, with real authentication.
 
 ## Things that won't change
+
+WealthOS is for your own records: your accounts, your investments and your own freelancer bookkeeping. On tax entries, the client or supplier is just the name on your invoice. Payroll, other people's tax forms and views that mix several people's finances are out of scope.
 
 Your data stays on your machine. Anything that connects to an outside service will be optional and documented. Tax numbers will always say they're estimates and what they assume. And it stays a single jar you can run with nothing but Java installed.
